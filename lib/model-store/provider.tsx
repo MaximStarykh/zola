@@ -10,24 +10,11 @@ import {
   useState,
 } from "react"
 
-type UserKeyStatus = {
-  openrouter: boolean
-  openai: boolean
-  mistral: boolean
-  google: boolean
-  perplexity: boolean
-  xai: boolean
-  anthropic: boolean
-  [key: string]: boolean // Allow for additional providers
-}
-
 type ModelContextType = {
   models: ModelConfig[]
-  userKeyStatus: UserKeyStatus
   favoriteModels: string[]
   isLoading: boolean
   refreshModels: () => Promise<void>
-  refreshUserKeyStatus: () => Promise<void>
   refreshFavoriteModels: () => Promise<void>
   refreshFavoriteModelsSilent: () => Promise<void>
   refreshAll: () => Promise<void>
@@ -37,15 +24,6 @@ const ModelContext = createContext<ModelContextType | undefined>(undefined)
 
 export function ModelProvider({ children }: { children: React.ReactNode }) {
   const [models, setModels] = useState<ModelConfig[]>([])
-  const [userKeyStatus, setUserKeyStatus] = useState<UserKeyStatus>({
-    openrouter: false,
-    openai: false,
-    mistral: false,
-    google: false,
-    perplexity: false,
-    xai: false,
-    anthropic: false,
-  })
   const [favoriteModels, setFavoriteModels] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -61,27 +39,6 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const fetchUserKeyStatus = useCallback(async () => {
-    try {
-      const response = await fetchClient("/api/user-key-status")
-      if (response.ok) {
-        const data = await response.json()
-        setUserKeyStatus(data)
-      }
-    } catch (error) {
-      console.error("Failed to fetch user key status:", error)
-      // Set default values on error
-      setUserKeyStatus({
-        openrouter: false,
-        openai: false,
-        mistral: false,
-        google: false,
-        perplexity: false,
-        xai: false,
-        anthropic: false,
-      })
-    }
-  }, [])
 
   const fetchFavoriteModels = useCallback(async () => {
     try {
@@ -107,14 +64,6 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
     }
   }, [fetchModels])
 
-  const refreshUserKeyStatus = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      await fetchUserKeyStatus()
-    } finally {
-      setIsLoading(false)
-    }
-  }, [fetchUserKeyStatus])
 
   const refreshFavoriteModels = useCallback(async () => {
     setIsLoading(true)
@@ -139,15 +88,11 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
   const refreshAll = useCallback(async () => {
     setIsLoading(true)
     try {
-      await Promise.all([
-        fetchModels(),
-        fetchUserKeyStatus(),
-        fetchFavoriteModels(),
-      ])
+      await Promise.all([fetchModels(), fetchFavoriteModels()])
     } finally {
       setIsLoading(false)
     }
-  }, [fetchModels, fetchUserKeyStatus, fetchFavoriteModels])
+  }, [fetchModels, fetchFavoriteModels])
 
   // Initial data fetch
   useEffect(() => {
@@ -159,11 +104,9 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
     <ModelContext.Provider
       value={{
         models,
-        userKeyStatus,
         favoriteModels,
         isLoading,
         refreshModels,
-        refreshUserKeyStatus,
         refreshFavoriteModels,
         refreshFavoriteModelsSilent,
         refreshAll,
@@ -182,3 +125,4 @@ export function useModel() {
   }
   return context
 }
+

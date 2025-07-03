@@ -1,6 +1,6 @@
 # Zola Installation Guide
 
-Zola is a free, open-source AI chat app with multi-model support. This guide covers how to install and run Zola on different platforms, including Docker deployment options.
+Zola is a free, open-source AI chat app powered entirely by Google Gemini models. This guide covers how to install and run Zola on different platforms, including Docker deployment options.
 
 ![Zola screenshot](./public/cover_zola.webp)
 
@@ -10,7 +10,7 @@ Zola is a free, open-source AI chat app with multi-model support. This guide cov
 - npm or yarn
 - Git
 - Supabase account (for auth and storage)
-- API keys for supported AI models (OpenAI, Mistral, etc.) OR Ollama for local models
+- A company Gemini API key
 
 ## Environment Setup
 
@@ -22,15 +22,6 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE=your_supabase_service_role_key
 
-# OpenAI
-OPENAI_API_KEY=your_openai_api_key
-
-# Mistral
-MISTRAL_API_KEY=your_mistral_api_key
-
-# OpenRouter
-OPENROUTER_API_KEY=your_openrouter_api_key
-
 # CSRF Protection
 CSRF_SECRET=your_csrf_secret_key
 
@@ -38,16 +29,8 @@ CSRF_SECRET=your_csrf_secret_key
 EXA_API_KEY=your_exa_api_key
 
 # Gemini
-GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key
+GEMINI_API_KEY=your_company_gemini_key
 
-# Anthropic
-ANTHROPIC_API_KEY=your_anthropic_api_key
-
-# Xai
-XAI_API_KEY=your_xai_api_key
-
-# Ollama (for local AI models)
-OLLAMA_BASE_URL=http://localhost:11434
 
 # Optional: Set the URL for production
 # NEXT_PUBLIC_VERCEL_URL=your_production_url
@@ -78,40 +61,6 @@ python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
 Copy the generated value and add it to your `.env.local` file as the `CSRF_SECRET` value.
-
-### BYOK (Bring Your Own Key) Setup
-
-Zola supports BYOK functionality, allowing users to securely store and use their own API keys for AI providers. To enable this feature, you need to configure an encryption key for secure storage of user API keys.
-
-#### Generating an Encryption Key
-
-The `ENCRYPTION_KEY` is used to encrypt user API keys before storing them in the database. Generate a 32-byte base64-encoded key:
-
-```bash
-# Using Node.js
-node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
-
-# Using OpenSSL
-openssl rand -base64 32
-
-# Using Python
-python -c "import base64, secrets; print(base64.b64encode(secrets.token_bytes(32)).decode())"
-```
-
-Add the generated key to your `.env.local` file:
-
-```bash
-# Required for BYOK functionality
-ENCRYPTION_KEY=your_generated_base64_encryption_key
-```
-
-**Important**:
-
-- Keep this key secure and backed up - losing it will make existing user API keys unrecoverable
-- Use the same key across all your deployment environments
-- The key must be exactly 32 bytes when base64 decoded
-
-With BYOK enabled, users can securely add their own API keys through the settings interface, giving them access to AI models using their personal accounts and usage limits.
 
 #### Google OAuth Authentication
 
@@ -239,16 +188,6 @@ CREATE TABLE feedback (
   CONSTRAINT feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- User keys table for BYOK (Bring Your Own Key) integration
-CREATE TABLE user_keys (
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  provider TEXT NOT NULL,
-  encrypted_key TEXT NOT NULL,
-  iv TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  PRIMARY KEY (user_id, provider)
-);
 
 -- User preferences table
 CREATE TABLE user_preferences (
@@ -595,8 +534,7 @@ docker run -p 3000:3000 \
   -e NEXT_PUBLIC_SUPABASE_URL=your_supabase_url \
   -e NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key \
   -e SUPABASE_SERVICE_ROLE=your_supabase_service_role_key \
-  -e OPENAI_API_KEY=your_openai_api_key \
-  -e MISTRAL_API_KEY=your_mistral_api_key \
+  -e GEMINI_API_KEY=your_company_gemini_key \
   zola
 ```
 
@@ -619,8 +557,7 @@ services:
       - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
       - SUPABASE_SERVICE_ROLE=${SUPABASE_SERVICE_ROLE}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     restart: unless-stopped
 ```
 

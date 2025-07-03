@@ -26,8 +26,13 @@ const geminiModels: ModelConfig[] = [
     apiDocs: "https://ai.google.dev/api/docs",
     modelPage: "https://deepmind.google/technologies/gemini",
     icon: "gemini",
-    apiSdk: (apiKey?: string) =>
-      openproviders("gemini-1.5-flash-002", undefined, apiKey),
+    webSearch: true,
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
+      openproviders(
+        "gemini-1.5-flash-002",
+        opts?.enableSearch ? { useSearchGrounding: true } : undefined,
+        apiKey,
+      ),
   },
   {
     id: "gemini-1.5-flash-8b",
@@ -53,8 +58,13 @@ const geminiModels: ModelConfig[] = [
     apiDocs: "https://ai.google.dev/api/docs",
     modelPage: "https://deepmind.google/technologies/gemini",
     icon: "gemini",
-    apiSdk: (apiKey?: string) =>
-      openproviders("gemini-1.5-flash-8b", undefined, apiKey),
+    webSearch: true,
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
+      openproviders(
+        "gemini-1.5-flash-8b",
+        opts?.enableSearch ? { useSearchGrounding: true } : undefined,
+        apiKey,
+      ),
   },
   {
     id: "gemini-1.5-pro-002",
@@ -81,8 +91,13 @@ const geminiModels: ModelConfig[] = [
     modelPage: "https://deepmind.google/technologies/gemini",
     releasedAt: "2024-02-15",
     icon: "gemini",
-    apiSdk: (apiKey?: string) =>
-      openproviders("gemini-1.5-pro-002", undefined, apiKey),
+    webSearch: true,
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
+      openproviders(
+        "gemini-1.5-pro-002",
+        opts?.enableSearch ? { useSearchGrounding: true } : undefined,
+        apiKey,
+      ),
   },
   {
     id: "gemini-2.0-flash-001",
@@ -109,8 +124,13 @@ const geminiModels: ModelConfig[] = [
     modelPage: "https://deepmind.google/technologies/gemini",
     releasedAt: "2024-12-11",
     icon: "gemini",
-    apiSdk: (apiKey?: string) =>
-      openproviders("gemini-2.0-flash-001", undefined, apiKey),
+    webSearch: true,
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
+      openproviders(
+        "gemini-2.0-flash-001",
+        opts?.enableSearch ? { useSearchGrounding: true } : undefined,
+        apiKey,
+      ),
   },
   {
     id: "gemini-2.0-flash-lite-preview-02-05",
@@ -136,8 +156,13 @@ const geminiModels: ModelConfig[] = [
     apiDocs: "https://ai.google.dev/api/docs",
     modelPage: "https://deepmind.google/technologies/gemini",
     icon: "gemini",
-    apiSdk: (apiKey?: string) =>
-      openproviders("gemini-2.0-flash-lite-preview-02-05", undefined, apiKey),
+    webSearch: true,
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
+      openproviders(
+        "gemini-2.0-flash-lite-preview-02-05",
+        opts?.enableSearch ? { useSearchGrounding: true } : undefined,
+        apiKey,
+      ),
   },
   {
     id: "gemini-2.5-pro-exp-03-25",
@@ -164,8 +189,13 @@ const geminiModels: ModelConfig[] = [
     apiDocs: "https://ai.google.dev/api/docs",
     modelPage: "https://deepmind.google/technologies/gemini",
     icon: "gemini",
-    apiSdk: (apiKey?: string) =>
-      openproviders("gemini-2.5-pro-exp-03-25", undefined, apiKey),
+    webSearch: true,
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
+      openproviders(
+        "gemini-2.5-pro-exp-03-25",
+        opts?.enableSearch ? { useSearchGrounding: true } : undefined,
+        apiKey,
+      ),
   },
   {
     id: "gemini-2.5-pro-exp-03-25-pro",
@@ -192,8 +222,13 @@ const geminiModels: ModelConfig[] = [
     apiDocs: "https://ai.google.dev/api/docs",
     modelPage: "https://deepmind.google/technologies/gemini",
     icon: "gemini",
-    apiSdk: (apiKey?: string) =>
-      openproviders("gemini-2.5-pro-exp-03-25", undefined, apiKey),
+    webSearch: true,
+    apiSdk: (apiKey?: string, opts?: { enableSearch?: boolean }) =>
+      openproviders(
+        "gemini-2.5-pro-exp-03-25",
+        opts?.enableSearch ? { useSearchGrounding: true } : undefined,
+        apiKey,
+      ),
   },
   {
     id: "gemma-3-27b-it",
@@ -221,7 +256,8 @@ const geminiModels: ModelConfig[] = [
     modelPage: "https://ai.google.dev/gemma",
     releasedAt: "2024-12-01",
     icon: "gemini",
-    apiSdk: (apiKey?: string) =>
+    webSearch: false,
+    apiSdk: (apiKey?: string, _opts?: { enableSearch?: boolean }) =>
       openproviders("gemma-3-27b-it", undefined, apiKey),
   },
 ]

@@ -2,56 +2,28 @@
 
 [zola.chat](https://zola.chat)
 
-**Zola** is the open-source chat interface for all your models.
+**Zola** is the open-source chat interface for Google Gemini models.
 
 ![zola cover](./public/cover_zola.jpg)
 
 ## Features
 
-- Multi-model support: OpenAI, Mistral, Claude, Gemini, Ollama (local models)
-- Bring your own API key (BYOK) support via OpenRouter
+- Powered exclusively by Google Gemini models
 - File uploads
 - Clean, responsive UI with light/dark themes
 - Built with Tailwind CSS, shadcn/ui, and prompt-kit
 - Open-source and self-hostable
 - Customizable: user system prompt, multiple layout options
-- Local AI with Ollama: Run models locally with automatic model detection
 - Full MCP support (wip)
 
 ## Quick Start
 
-### Option 1: With OpenAI (Cloud)
-
 ```bash
 git clone https://github.com/ibelick/zola.git
 cd zola
 npm install
-echo "OPENAI_API_KEY=your-key" > .env.local
+echo "GEMINI_API_KEY=your-company-key" > .env.local
 npm run dev
-```
-
-### Option 2: With Ollama (Local)
-
-```bash
-# Install and start Ollama
-curl -fsSL https://ollama.ai/install.sh | sh
-ollama pull llama3.2  # or any model you prefer
-
-# Clone and run Zola
-git clone https://github.com/ibelick/zola.git
-cd zola
-npm install
-npm run dev
-```
-
-Zola will automatically detect your local Ollama models!
-
-### Option 3: Docker with Ollama
-
-```bash
-git clone https://github.com/ibelick/zola.git
-cd zola
-docker-compose -f docker-compose.ollama.yml up
 ```
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ibelick/zola)
