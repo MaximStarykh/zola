@@ -5,12 +5,10 @@ import type {
   StoreAssistantMessageParams,
   SupabaseClientType,
 } from "@/app/types/api.types"
-import { FREE_MODELS_IDS, NON_AUTH_ALLOWED_MODELS } from "@/lib/config"
-import { getProviderForModel } from "@/lib/openproviders/provider-map"
+import { NON_AUTH_ALLOWED_MODELS } from "@/lib/config"
 import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
 import { checkUsageByModel, incrementUsage } from "@/lib/usage"
-import { getUserKey, type ProviderWithoutOllama } from "@/lib/user-keys"
 
 export async function validateAndTrackUsage({
   userId,
@@ -29,22 +27,7 @@ export async function validateAndTrackUsage({
       )
     }
   } else {
-    // For authenticated users, check API key requirements
-    const provider = getProviderForModel(model)
-
-    if (provider !== "ollama") {
-      const userApiKey = await getUserKey(
-        userId,
-        provider as ProviderWithoutOllama
-      )
-
-      // If no API key and model is not in free list, deny access
-      if (!userApiKey && !FREE_MODELS_IDS.includes(model)) {
-        throw new Error(
-          `This model requires an API key for ${provider}. Please add your API key in settings or use a free model.`
-        )
-      }
-    }
+    // No per-user API key checks; all requests use the server key
   }
 
   // Check usage limits for the model
@@ -76,8 +59,7 @@ export async function logUserMessage({
   chatId,
   content,
   attachments,
-  model,
-  isAuthenticated,
+  // omit unused fields
   message_group_id,
 }: LogUserMessageParams): Promise<void> {
   if (!supabase) return
