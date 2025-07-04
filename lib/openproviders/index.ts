@@ -9,12 +9,38 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
     if (init?.body && typeof init.body === "string") {
       try {
         const payload = JSON.parse(init.body)
-        if (payload.system_instruction && !payload.systemInstruction) {
-          payload.systemInstruction = payload.system_instruction
+        
+        // Handle system_instruction by moving it to messages array as a system message
+        if (payload.system_instruction || payload.systemInstruction) {
+          const systemContent = payload.system_instruction || payload.systemInstruction
+          
+          // Initialize messages array if it doesn't exist
+          if (!Array.isArray(payload.messages)) {
+            payload.messages = []
+          }
+          
+          // Add system message at the beginning of messages array if not already present
+          const hasSystemMessage = payload.messages.some(
+            (msg: any) => msg.role === 'system'
+          )
+          
+          if (!hasSystemMessage && systemContent) {
+            payload.messages.unshift({
+              role: 'system',
+              content: systemContent
+            })
+          }
+          
+          // Remove the old fields
           delete payload.system_instruction
+          delete payload.systemInstruction
+          
+          // Update the request body
           init.body = JSON.stringify(payload)
         }
-      } catch {}
+      } catch (error) {
+        console.error('Error processing request payload:', error)
+      }
     }
     return baseFetch(url, init)
   }
