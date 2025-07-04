@@ -4,6 +4,17 @@ import type { GeminiModel, SupportedModel } from "./types"
 
 const GOOGLE_BASE_URL = "https://generativelanguage.googleapis.com/v1"
 
+async function getSystemPrompt() {
+  try {
+    // Use dynamic import to avoid circular dependencies
+    const config = await import('@/lib/config')
+    return config.SYSTEM_PROMPT_DEFAULT || ''
+  } catch (error) {
+    console.error('Error loading system prompt:', error)
+    return ''
+  }
+}
+
 function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
   return async (url, init) => {
     if (init?.body && typeof init.body === "string") {
@@ -11,23 +22,20 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
         const payload = JSON.parse(init.body)
 
         // Check if this is a Google Generative AI API request
-        const isGoogleAI = url
-          .toString()
-          .includes("generativelanguage.googleapis.com")
-
-        // Import the default system prompt
-        let systemContent =
+        const isGoogleAI = url.toString().includes('generativelanguage.googleapis.com')
+        
+        // Get system prompt from payload or use default
+        let systemContent = 
           payload.system_instruction ||
           payload.systemInstruction ||
           payload.system
 
         // For Google AI, ensure we always have a system prompt
         if (isGoogleAI && !systemContent) {
-          const { SYSTEM_PROMPT_DEFAULT } = await import("@/lib/config")
-          systemContent = SYSTEM_PROMPT_DEFAULT
+          systemContent = await getSystemPrompt()
         }
-
-        // Handle system instruction if we have one
+        
+        // Handle system instruction if we have one or it's a Google AI request
         if (systemContent || isGoogleAI) {
           if (isGoogleAI) {
             // For Google's API, we need to include the system instruction in the request body
@@ -50,11 +58,11 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
 
               // Remove the messages array as it's not needed
               delete payload.messages
-
-              // Remove tools field as it's not supported by Google's API
-              if ("tools" in payload) {
-                delete payload.tools
-              }
+            }
+            
+            // Always remove tools field for Google AI as it's not supported
+            if ('tools' in payload) {
+              delete payload.tools
             }
           } else {
             // For other providers, maintain the messages array approach
