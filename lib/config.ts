@@ -20,8 +20,8 @@ export const FREE_MODELS_IDS = ["gemini-2.5-flash"]
 
 export const MODEL_DEFAULT = "gemini-2.5-flash"
 
-export const APP_NAME = "Zola"
-export const APP_DOMAIN = "https://zola.chat"
+export const APP_NAME = "oLegal"
+export const APP_DOMAIN = "https://olegal.chat"
 
 export const SUGGESTIONS = [
   {
@@ -182,5 +182,5 @@ export const SYSTEM_PROMPT_DEFAULT = `
 
 ---
 *Disclaimer: Ця відповідь є результатом роботи AI-асистента oLegal і надається виключно для інформаційних цілей. Вона не є офіційною юридичною консультацією та не може замінити звернення до кваліфікованого юриста для аналізу вашої конкретної ситуації.*
-`;
+`
 export const MESSAGE_MAX_LENGTH = 10000
