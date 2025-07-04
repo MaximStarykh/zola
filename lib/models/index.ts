@@ -11,7 +11,7 @@ export async function getAllModels(): Promise<ModelConfig[]> {
 export async function getModelsWithAccessFlags(): Promise<ModelConfig[]> {
   return STATIC_MODELS.map((m) => ({
     ...m,
-    accessible: FREE_MODELS_IDS.includes(m.id),
+    accessible: true,
   }))
 }
 
