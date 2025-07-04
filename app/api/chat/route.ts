@@ -1,5 +1,4 @@
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
-import { systemPrompt as customSystemPrompt } from "@/lib/custom-system-prompt"
 import { getAllModels } from "@/lib/models"
 import { getProviderForModel } from "@/lib/openproviders/provider-map"
 import type { SupportedModel } from "@/lib/openproviders/types"
@@ -85,7 +84,7 @@ export async function POST(req: Request) {
     let apiKey: string | undefined
     if (isAuthenticated && userId) {
       const { getEffectiveApiKey } = await import("@/lib/user-keys")
-    const provider = getProviderForModel(model as SupportedModel)
+      const provider = getProviderForModel(model as SupportedModel)
       apiKey =
         (await getEffectiveApiKey(userId, provider as ProviderWithoutOllama)) ||
         undefined
@@ -94,7 +93,7 @@ export async function POST(req: Request) {
     const result = streamText({
       model: modelConfig.apiSdk(apiKey, { enableSearch }),
       system: effectiveSystemPrompt,
-      messages: [{ role: "system", content: customSystemPrompt }, ...messages],
+      messages,
       tools: {} as ToolSet,
       maxSteps: 10,
       onError: (err: unknown) => {
