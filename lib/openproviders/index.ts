@@ -27,35 +27,33 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
           .includes("generativelanguage.googleapis.com")
 
         // Get system prompt from payload or use default
-        let systemContent =
+        let systemContent = 
           payload.system_instruction ||
           payload.systemInstruction ||
-          payload.system
+          payload.system ||
+          (await getSystemPrompt()) ||
+          ""
 
         // For Google AI, ensure we always have a system prompt
-        if (isGoogleAI && !systemContent) {
-          systemContent = await getSystemPrompt()
-        }
+        if (isGoogleAI) {
+          // For Google's API, we need to include the system instruction in the request body
+          // as 'systemInstruction' (camelCase) and format it as an array of strings
+          if (!payload.config) {
+            payload.config = {}
+          }
+          payload.config.systemInstruction = [systemContent]
 
-        // Handle system instruction if we have one or it's a Google AI request
-        if (systemContent || isGoogleAI) {
-          if (isGoogleAI) {
-            // For Google's API, we need to include the system instruction in the request body
-            // as 'systemInstruction' (camelCase) and remove the messages array
-            payload.systemInstruction = systemContent || ""
+          // Convert messages to the format Google's API expects
+          if (Array.isArray(payload.messages)) {
+            // Extract the last user message as the prompt
+            const lastUserMessage = payload.messages
+              .slice()
+              .reverse()
+              .find((msg: any) => msg.role === "user")
 
-            // Convert messages to the format Google's API expects
-            if (Array.isArray(payload.messages)) {
-              // Extract the last user message as the prompt
-              const lastUserMessage = payload.messages
-                .slice()
-                .reverse()
-                .find((msg: any) => msg.role === "user")
-
-              if (lastUserMessage) {
-                payload.prompt = {
-                  text: lastUserMessage.content,
-                }
+            if (lastUserMessage) {
+              payload.prompt = {
+                text: lastUserMessage.content,
               }
 
               // Remove the messages array as it's not needed
@@ -95,23 +93,57 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
   }
 }
 
-export type OpenProvidersOptions = Parameters<
-  ReturnType<typeof createGoogleGenerativeAI>
->[1]
+// Type for Google Search tool configuration
+type GoogleSearchTool = {
+  googleSearch: { version: string }
+}
+
+// Type for model configuration
+type ModelConfig = {
+  systemInstruction?: string[]
+  tools?: GoogleSearchTool[]
+  [key: string]: any
+}
+
+// Type for our provider options
+export interface OpenProvidersOptions {
+  config?: ModelConfig
+  enableSearch?: boolean
+  // Allow any other properties that might be needed
+  [key: string]: any
+}
 
 export function openproviders<T extends SupportedModel>(
   modelId: T,
-  settings?: OpenProvidersOptions,
+  settings?: OpenProvidersOptions & { enableSearch?: boolean },
   apiKey?: string
 ): LanguageModelV1 {
   const options = {
     baseURL: GOOGLE_BASE_URL,
     fetch: withPatchedFetch(fetch),
   }
-  if (apiKey) {
-    const provider = createGoogleGenerativeAI({ apiKey, ...options })
-    return provider(modelId as GeminiModel, settings)
+  
+  // Extract enableSearch from settings
+  const { enableSearch, ...modelSettings } = settings || {}
+  
+  // Create final settings with proper typing
+  const finalSettings: OpenProvidersOptions = {
+    ...modelSettings,
   }
-  const provider = createGoogleGenerativeAI(options)
-  return provider(modelId as GeminiModel, settings)
+  
+  // Add googleSearch tool to config if enabled
+  if (enableSearch) {
+    finalSettings.config = {
+      ...finalSettings.config,
+      tools: [{ googleSearch: { version: '1.0.0' } }]
+    } as ModelConfig
+  }
+  
+  // Create the provider with API key if available
+  const provider = apiKey 
+    ? createGoogleGenerativeAI({ apiKey, ...options })
+    : createGoogleGenerativeAI(options)
+  
+  // Return the model with the final settings
+  return provider(modelId as GeminiModel, finalSettings as any)
 }
