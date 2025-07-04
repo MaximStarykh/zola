@@ -1,10 +1,10 @@
 # Repo guidelines for Codex agents
 
-This file contains instructions for Codex or other automated agents contributing to **Zola**.
+This file contains instructions for Codex or other automated agents contributing to **oLegal**.
 
 ## Repository overview
 
-Zola is a Next.js 15 application written in TypeScript. The project uses Tailwind CSS and shadcn components. Source files live primarily under the `app/` and `lib/` folders. Styling is handled via Tailwind and global CSS in `app/globals.css`.
+oLegal is a Next.js 15 application written in TypeScript. The project uses Tailwind CSS and shadcn components. Source files live primarily under the `app/` and `lib/` folders. Styling is handled via Tailwind and global CSS in `app/globals.css`.
 
 Most of the codebase is formatted with Prettier using the configuration in `.prettierrc.json`. ESLint rules are defined in `eslint.config.mjs`.
 
