@@ -9,9 +9,9 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
     if (init?.body && typeof init.body === "string") {
       try {
         const payload = JSON.parse(init.body)
-        if (payload.system_instruction && !payload.systemInstruction) {
-          payload.systemInstruction = payload.system_instruction
-          delete payload.system_instruction
+        if (payload.systemInstruction && !payload.system_instruction) {
+          payload.system_instruction = payload.systemInstruction
+          delete payload.systemInstruction
           init.body = JSON.stringify(payload)
         }
       } catch {}
