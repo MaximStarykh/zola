@@ -10,30 +10,43 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
       try {
         const payload = JSON.parse(init.body)
         
-        // Handle system_instruction by moving it to messages array as a system message
+        // Check if this is a Google Generative AI API request
+        const isGoogleAI = url.toString().includes('generativelanguage.googleapis.com')
+        
+        // Handle system instruction
         if (payload.system_instruction || payload.systemInstruction) {
           const systemContent = payload.system_instruction || payload.systemInstruction
           
-          // Initialize messages array if it doesn't exist
-          if (!Array.isArray(payload.messages)) {
-            payload.messages = []
-          }
-          
-          // Add system message at the beginning of messages array if not already present
-          const hasSystemMessage = payload.messages.some(
-            (msg: any) => msg.role === 'system'
-          )
-          
-          if (!hasSystemMessage && systemContent) {
-            payload.messages.unshift({
-              role: 'system',
-              content: systemContent
-            })
+          if (isGoogleAI) {
+            // For Google's API, we need to include the system instruction in the request body
+            // as 'systemInstruction' (camelCase) and remove the messages array
+            payload.systemInstruction = systemContent
+          } else {
+            // For other providers, maintain the messages array approach
+            if (!Array.isArray(payload.messages)) {
+              payload.messages = []
+            }
+            
+            const hasSystemMessage = payload.messages.some(
+              (msg: any) => msg.role === 'system'
+            )
+            
+            if (!hasSystemMessage && systemContent) {
+              payload.messages.unshift({
+                role: 'system',
+                content: systemContent
+              })
+            }
           }
           
           // Remove the old fields
           delete payload.system_instruction
           delete payload.systemInstruction
+          
+          // For Google AI, remove the messages array as it's not needed
+          if (isGoogleAI) {
+            delete payload.messages
+          }
           
           // Update the request body
           init.body = JSON.stringify(payload)
