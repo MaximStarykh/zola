@@ -1,10 +1,10 @@
-# Zola
+# oLegal
 
-[zola.chat](https://zola.chat)
+[olegal.chat](https://olegal.chat)
 
-**Zola** is the open-source chat interface for Google Gemini models.
+**oLegal** is the open-source chat interface for Google Gemini models.
 
-![zola cover](./public/cover_zola.jpg)
+![olegal cover](./public/cover_zola.jpg)
 
 ## Features
 
@@ -19,14 +19,14 @@
 ## Quick Start
 
 ```bash
-git clone https://github.com/ibelick/zola.git
-cd zola
+git clone https://github.com/ibelick/olegal.git
+cd olegal
 npm install
 echo "GEMINI_API_KEY=your-company-key" > .env.local
 npm run dev
 ```
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ibelick/zola)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ibelick/olegal)
 
 To unlock features like auth, file uploads, see [INSTALL.md](./INSTALL.md).
 

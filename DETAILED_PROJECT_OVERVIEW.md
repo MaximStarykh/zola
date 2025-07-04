@@ -2,9 +2,10 @@
 
 ## 📁 Project Purpose & Overview
 
-Zola is an open‑source chat interface that supports multiple AI models. The application can run with cloud models (OpenAI, Mistral, Claude, etc.) or local models via Ollama. It integrates authentication and storage through Supabase and uses Next.js 15 with React 19. The UI relies on Tailwind CSS, shadcn/ui components, motion‑primitives animations and prompt‑kit chat widgets.
+oLegal is an open‑source chat interface that supports multiple AI models. The application can run with cloud models (OpenAI, Mistral, Claude, etc.) or local models via Ollama. It integrates authentication and storage through Supabase and uses Next.js 15 with React 19. The UI relies on Tailwind CSS, shadcn/ui components, motion‑primitives animations and prompt‑kit chat widgets.
 
 The project offers:
+
 - Multi‑model chat with BYOK (bring‑your‑own‑key) support.
 - File uploads and chat sharing.
 - Rate limiting and usage tracking per model.
@@ -25,12 +26,13 @@ The project offers:
 Below is a condensed explanation of key files. Image/icon assets are grouped for brevity.
 
 ### Root Files
+
 - `.dockerignore` – Files ignored by Docker builds.
 - `.env.example` – Sample environment variables such as API keys and Supabase URL【F:.env.example†L1-L29】.
 - `.gitignore` – Git ignore rules.
 - `Dockerfile` – Multi‑stage build producing a standalone Next.js app【F:Dockerfile†L1-L63】.
 - `docker-compose.yml` – Runs the app container with health checks【F:docker-compose.yml†L1-L17】.
-- `docker-compose.ollama.yml` – Adds an Ollama service for local models alongside Zola【F:docker-compose.ollama.yml†L1-L39】.
+- `docker-compose.ollama.yml` – Adds an Ollama service for local models alongside oLegal【F:docker-compose.ollama.yml†L1-L39】.
 - `eslint.config.mjs` – ESLint configuration.
 - `next.config.ts` – Next.js configuration enabling bundle analyzer and remote image patterns【F:next.config.ts†L1-L29】.
 - `middleware.ts` – Updates Supabase session and enforces CSRF tokens and CSP headers【F:middleware.ts†L1-L35】.
@@ -42,9 +44,11 @@ Below is a condensed explanation of key files. Image/icon assets are grouped for
 - `README.md` – Introductory overview and quick start instructions【F:README.md†L1-L50】.
 
 ### Public Assets
+
 - `public/*` – Images (banner backgrounds, cover) and GitHub button graphic.
 
 ### Application Directory (`app`)
+
 - `app/layout.tsx` – Root layout that loads fonts, providers and analytics scripts【F:app/layout.tsx†L1-L87】.
 - `app/layout-client.tsx` – Client component for responsive behavior.
 - `app/globals.css` – Global Tailwind styles.
@@ -70,6 +74,7 @@ Below is a condensed explanation of key files. Image/icon assets are grouped for
   - `api/health/route.ts` – Simple health check endpoint returning uptime【F:app/api/health/route.ts†L1-L11】.
 
 ### Library (`lib`)
+
 - `lib/config.ts` – App constants, default prompt and suggestion lists【F:lib/config.ts†L1-L89】.
 - `lib/csrf.ts` – CSRF token creation and validation helpers【F:lib/csrf.ts†L1-L25】.
 - `lib/fetch.ts` – Adds CSRF header to client fetches【F:lib/fetch.ts†L1-L14】.
@@ -88,6 +93,7 @@ Below is a condensed explanation of key files. Image/icon assets are grouped for
 - `lib/motion.ts` – Shared motion configuration for animations.
 
 ### Components (`components`)
+
 - `components/ui/*` – Shadcn/ui wrappers (buttons, dialogs, forms).
 - `components/prompt-kit/*` – Chat interface primitives like `chat-container.tsx` and `file-upload.tsx`【F:components/prompt-kit/chat-container.tsx†L1-L37】【F:components/prompt-kit/file-upload.tsx†L1-L63】.
 - `components/motion-primitives/*` – Reusable animation helpers such as `progressive-blur.tsx`【F:components/motion-primitives/progressive-blur.tsx†L1-L40】.
@@ -95,9 +101,11 @@ Below is a condensed explanation of key files. Image/icon assets are grouped for
 - `components/common/*` – Shared UI features. Example: `feedback-form.tsx` posts feedback to Supabase【F:components/common/feedback-form.tsx†L1-L88】.
 
 ### Utilities (`utils`)
+
 - `utils/supabase/middleware.ts` – Middleware helper for Supabase sessions used in `middleware.ts`【F:utils/supabase/middleware.ts†L1-L62】.
 
 ### Type Definitions
+
 - `app/types/api.types.ts` – Interfaces for API message formats and Supabase client type【F:app/types/api.types.ts†L1-L53】.
 - `app/types/database.types.ts` – Generated types for Supabase tables (users, chats, messages, etc.)【F:app/types/database.types.ts†L1-L157】.
 
@@ -140,7 +148,6 @@ Below is a condensed explanation of key files. Image/icon assets are grouped for
 
 1. Create `.env.local` using `.env.example` and ensure `CSRF_SECRET` plus Supabase keys are set.
 2. Install dependencies with `npm install`. Running `npm run type-check` requires TypeScript and `@types/*` packages which may be missing in a minimal environment.
-3. For local models, install Ollama and run `docker-compose -f docker-compose.ollama.yml up` to start both the model server and Zola.
+3. For local models, install Ollama and run `docker-compose -f docker-compose.ollama.yml up` to start both the model server and oLegal.
 4. Review `INSTALL.md` for full database setup and environment configuration.
 5. Explore React context providers under `lib/*store` to understand state management and persistence.
-
