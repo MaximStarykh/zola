@@ -13,14 +13,44 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
         // Check if this is a Google Generative AI API request
         const isGoogleAI = url.toString().includes('generativelanguage.googleapis.com')
         
-        // Handle system instruction
-        if (payload.system_instruction || payload.systemInstruction) {
-          const systemContent = payload.system_instruction || payload.systemInstruction
-          
+        // Import the default system prompt
+        let systemContent = payload.system_instruction || payload.systemInstruction
+        
+        // For Google AI, ensure we always have a system prompt
+        if (isGoogleAI && !systemContent) {
+          const { SYSTEM_PROMPT_DEFAULT } = await import("@/lib/config")
+          systemContent = SYSTEM_PROMPT_DEFAULT
+        }
+        
+        // Handle system instruction if we have one
+        if (systemContent || isGoogleAI) {
           if (isGoogleAI) {
             // For Google's API, we need to include the system instruction in the request body
             // as 'systemInstruction' (camelCase) and remove the messages array
-            payload.systemInstruction = systemContent
+            payload.systemInstruction = systemContent || ''
+            
+            // Convert messages to the format Google's API expects
+            if (Array.isArray(payload.messages)) {
+              // Extract the last user message as the prompt
+              const lastUserMessage = payload.messages
+                .slice()
+                .reverse()
+                .find((msg: any) => msg.role === 'user')
+              
+              if (lastUserMessage) {
+                payload.prompt = {
+                  text: lastUserMessage.content
+                }
+              }
+              
+              // Remove the messages array as it's not needed
+              delete payload.messages
+              
+              // Remove tools field as it's not supported by Google's API
+              if ('tools' in payload) {
+                delete payload.tools
+              }
+            }
           } else {
             // For other providers, maintain the messages array approach
             if (!Array.isArray(payload.messages)) {
@@ -42,11 +72,6 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
           // Remove the old fields
           delete payload.system_instruction
           delete payload.systemInstruction
-          
-          // For Google AI, remove the messages array as it's not needed
-          if (isGoogleAI) {
-            delete payload.messages
-          }
           
           // Update the request body
           init.body = JSON.stringify(payload)
