@@ -16,79 +16,71 @@ async function getSystemPrompt() {
 }
 
 function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
-  return async (url, init) => {
+  return async (url: RequestInfo | URL, init?: RequestInit) => {
     if (init?.body && typeof init.body === "string") {
       try {
         const payload = JSON.parse(init.body)
+        const isGoogleAI = url.toString().includes("generativelanguage.googleapis.com")
 
-        // Check if this is a Google Generative AI API request
-        const isGoogleAI = url
-          .toString()
-          .includes("generativelanguage.googleapis.com")
-
-        // Get system prompt from payload or use default
-        let systemContent = 
-          payload.system_instruction ||
-          payload.systemInstruction ||
-          payload.system ||
-          (await getSystemPrompt()) ||
-          ""
-
-        // For Google AI, ensure we always have a system prompt
         if (isGoogleAI) {
-          // For Google's API, we need to include the system instruction in the request body
-          // as 'systemInstruction' (camelCase) and format it as an array of strings
-          if (!payload.config) {
-            payload.config = {}
-          }
-          payload.config.systemInstruction = [systemContent]
+          // Get system prompt from payload or use default
+          const systemContent = 
+            payload.system_instruction ||
+            payload.systemInstruction ||
+            payload.system ||
+            (await getSystemPrompt()) ||
+            ""
 
-          // Convert messages to the format Google's API expects
+          // Create the config object
+          const config: any = {}
+          
+          // Add system instruction if available
+          if (systemContent) {
+            config.systemInstruction = [systemContent]
+          }
+
+          // Create the contents array from messages
+          const contents: any[] = []
+          
           if (Array.isArray(payload.messages)) {
-            // Extract the last user message as the prompt
-            const lastUserMessage = payload.messages
-              .slice()
-              .reverse()
-              .find((msg: any) => msg.role === "user")
-
-            if (lastUserMessage) {
-              payload.prompt = {
-                text: lastUserMessage.content,
+            // Convert messages to the format Google's API expects
+            payload.messages.forEach((msg: any) => {
+              if (msg.role === 'user' || msg.role === 'assistant') {
+                contents.push({
+                  role: msg.role === 'user' ? 'user' : 'model',
+                  parts: [{ text: msg.content }]
+                })
               }
-
-              // Remove the messages array as it's not needed
-              delete payload.messages
-            }
-          } else {
-            // For other providers, maintain the messages array approach
-            if (!Array.isArray(payload.messages)) {
-              payload.messages = []
-            }
-
-            const hasSystemMessage = payload.messages.some(
-              (msg: any) => msg.role === "system"
-            )
-
-            if (!hasSystemMessage && systemContent) {
-              payload.messages.unshift({
-                role: "system",
-                content: systemContent,
-              })
-            }
+            })
           }
 
-          // Remove the old fields
-          delete payload.system_instruction
-          delete payload.systemInstruction
-          delete payload.system
+          // Create new payload with the correct structure
+          const newPayload: any = {
+            contents: contents
+          }
+
+          // Add config if we have any settings
+          if (Object.keys(config).length > 0) {
+            newPayload.config = config
+          }
+
+          // Update the request body with the new payload
+          init.body = JSON.stringify(newPayload)
+        } else {
+          // For other providers, just pass through the original payload
+          // No need to modify it as it's not a Google AI request
 
           // Update the request body
           init.body = JSON.stringify(payload)
         }
       } catch (error) {
         console.error("Error processing request payload:", error)
+        // Re-throw to ensure the error is properly handled
+        throw error
       }
     }
+    
+    // Make sure to return the fetch result
     return baseFetch(url, init)
   }
 }
@@ -127,16 +119,16 @@ export function openproviders<T extends SupportedModel>(
   const { enableSearch, ...modelSettings } = settings || {}
   
   // Create final settings with proper typing
-  const finalSettings: OpenProvidersOptions = {
+  const finalSettings: any = {
     ...modelSettings,
   }
   
   // Add googleSearch tool to config if enabled
   if (enableSearch) {
-    finalSettings.config = {
-      ...finalSettings.config,
-      tools: [{ googleSearch: { version: '1.0.0' } }]
-    } as ModelConfig
+    if (!finalSettings.config) {
+      finalSettings.config = {}
+    }
+    finalSettings.config.tools = [{ googleSearch: { version: '1.0.0' } }]
   }
   
   // Create the provider with API key if available
@@ -145,5 +137,5 @@ export function openproviders<T extends SupportedModel>(
     : createGoogleGenerativeAI(options)
   
   // Return the model with the final settings
-  return provider(modelId as GeminiModel, finalSettings as any)
+  return provider(modelId as GeminiModel, finalSettings)
 }
