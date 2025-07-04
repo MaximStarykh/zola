@@ -14,13 +14,11 @@ export const REMAINING_QUERY_ALERT_THRESHOLD = 2
 export const DAILY_FILE_UPLOAD_LIMIT = 5
 export const DAILY_LIMIT_PRO_MODELS = 500
 
-export const NON_AUTH_ALLOWED_MODELS = ["gemini-1.5-flash-002"]
+export const NON_AUTH_ALLOWED_MODELS = ["gemini-2.5-flash"]
 
-export const FREE_MODELS_IDS = [
-  "gemini-1.5-flash-002",
-]
+export const FREE_MODELS_IDS = ["gemini-2.5-flash"]
 
-export const MODEL_DEFAULT = "gemini-1.5-flash-002"
+export const MODEL_DEFAULT = "gemini-2.5-flash"
 
 export const APP_NAME = "Zola"
 export const APP_DOMAIN = "https://zola.chat"
