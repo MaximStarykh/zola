@@ -21,6 +21,7 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
       try {
         const payload = JSON.parse(init.body)
         const isGoogleAI = url.toString().includes("generativelanguage.googleapis.com")
+        const enableSearch = payload.enableSearch || false
 
         if (isGoogleAI) {
           // Get system prompt from payload or use default
@@ -31,37 +32,75 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
             (await getSystemPrompt()) ||
             ""
 
-          // Create the config object
-          const config: any = {}
-          
-          // Add system instruction if available
-          if (systemContent) {
-            config.systemInstruction = [systemContent]
-          }
-
           // Create the contents array from messages
           const contents: any[] = []
+          let currentContent: any = null
           
           if (Array.isArray(payload.messages)) {
-            // Convert messages to the format Google's API expects
-            payload.messages.forEach((msg: any) => {
-              if (msg.role === 'user' || msg.role === 'assistant') {
-                contents.push({
-                  role: msg.role === 'user' ? 'user' : 'model',
+            // Process messages in order
+            for (const msg of payload.messages) {
+              if (msg.role === 'user') {
+                // Start a new content block for user messages
+                if (currentContent) {
+                  contents.push(currentContent)
+                }
+                currentContent = {
+                  role: 'user',
                   parts: [{ text: msg.content }]
-                })
+                }
+              } else if (msg.role === 'assistant') {
+                // Add assistant response to the current content block
+                if (currentContent) {
+                  contents.push(currentContent)
+                }
+                currentContent = {
+                  role: 'model',
+                  parts: [{ text: msg.content }]
+                }
+              } else if (msg.role === 'system' && systemContent) {
+                // System message becomes the system instruction
+                if (currentContent) {
+                  contents.push(currentContent)
+                  currentContent = null
+                }
               }
-            })
+            }
+            
+            // Add the last content block if it exists
+            if (currentContent) {
+              contents.push(currentContent)
+            }
           }
+
+          // Create the system instruction
+          const systemInstruction = systemContent ? {
+            role: 'user',
+            parts: [{ text: systemContent }]
+          } : null
 
           // Create new payload with the correct structure
           const newPayload: any = {
-            contents: contents
+            contents: systemInstruction ? [systemInstruction, ...contents] : contents
           }
 
-          // Add config if we have any settings
-          if (Object.keys(config).length > 0) {
-            newPayload.config = config
+          // Add tools if search is enabled
+          if (enableSearch) {
+            newPayload.tools = [{
+              function_declarations: [{
+                name: 'search_web',
+                description: 'Search the web for information',
+                parameters: {
+                  type: 'object',
+                  properties: {
+                    query: {
+                      type: 'string',
+                      description: 'The search query'
+                    }
+                  },
+                  required: ['query']
+                }
+              }]
+            }]
           }
 
           // Update the request body with the new payload
