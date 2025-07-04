@@ -1,7 +1,7 @@
-import { getAllModels } from "@/lib/models"
+import { getModelsWithAccessFlags } from "@/lib/models"
 
 export async function GET() {
-  const models = await getAllModels()
+  const models = await getModelsWithAccessFlags()
   return new Response(JSON.stringify({ models }), {
     status: 200,
     headers: { "Content-Type": "application/json" },
@@ -9,7 +9,7 @@ export async function GET() {
 }
 
 export async function POST() {
-  const models = await getAllModels()
+  const models = await getModelsWithAccessFlags()
   return Response.json({
     message: "Models cache refreshed",
     models,
@@ -17,4 +17,3 @@ export async function POST() {
     count: models.length,
   })
 }
-
