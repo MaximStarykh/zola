@@ -94,7 +94,6 @@ export async function POST(req: Request) {
       model: modelConfig.apiSdk(apiKey, { enableSearch }),
       system: effectiveSystemPrompt,
       messages,
-      tools: {} as ToolSet,
       maxSteps: 10,
       onError: (err: unknown) => {
         console.error("Streaming error occurred:", err)
