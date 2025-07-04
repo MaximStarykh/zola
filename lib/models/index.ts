@@ -11,16 +11,20 @@ export async function getAllModels(): Promise<ModelConfig[]> {
 export async function getModelsWithAccessFlags(): Promise<ModelConfig[]> {
   return STATIC_MODELS.map((m) => ({
     ...m,
-    accessible: FREE_MODELS_IDS.includes(m.id) || true,
+    accessible: FREE_MODELS_IDS.includes(m.id),
   }))
 }
 
-export async function getModelsForProvider(provider: string): Promise<ModelConfig[]> {
+export async function getModelsForProvider(
+  provider: string
+): Promise<ModelConfig[]> {
   if (provider === "google") return STATIC_MODELS
   return []
 }
 
-export async function getModelsForUserProviders(providers: string[]): Promise<ModelConfig[]> {
+export async function getModelsForUserProviders(
+  providers: string[]
+): Promise<ModelConfig[]> {
   return providers.includes("google") ? STATIC_MODELS : []
 }
 
@@ -33,4 +37,3 @@ export const MODELS: ModelConfig[] = STATIC_MODELS
 export function refreshModelsCache(): void {
   // no-op since models are static
 }
-
