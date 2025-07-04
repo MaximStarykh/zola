@@ -7,7 +7,7 @@ import {
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
 import type { Message as MessageAISDK } from "@ai-sdk/react"
-import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
+import { ArrowClockwise, Check, Copy, Globe } from "@phosphor-icons/react"
 import { getSources } from "./get-sources"
 import { Reasoning } from "./reasoning"
 import { SearchImages } from "./search-images"
@@ -63,6 +63,12 @@ export function MessageAssistant({
           : []
       ) ?? []
 
+  const usedWebSearch = toolInvocationParts?.some(
+    (part) =>
+      part.toolInvocation?.toolName === "googleSearch" ||
+      part.toolInvocation?.toolName === "googleSearchRetrieval"
+  )
+
   return (
     <Message
       className={cn(
@@ -87,6 +93,12 @@ export function MessageAssistant({
 
         {searchImageResults.length > 0 && (
           <SearchImages results={searchImageResults} />
+        )}
+
+        {usedWebSearch && (
+          <div className="text-muted-foreground flex items-center gap-1 text-xs">
+            <Globe className="size-3" /> Web search used
+          </div>
         )}
 
         {contentNullOrEmpty ? null : (

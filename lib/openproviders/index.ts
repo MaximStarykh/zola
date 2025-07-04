@@ -7,11 +7,11 @@ const GOOGLE_BASE_URL = "https://generativelanguage.googleapis.com/v1"
 async function getSystemPrompt() {
   try {
     // Use dynamic import to avoid circular dependencies
-    const config = await import('@/lib/config')
-    return config.SYSTEM_PROMPT_DEFAULT || ''
+    const config = await import("@/lib/config")
+    return config.SYSTEM_PROMPT_DEFAULT || ""
   } catch (error) {
-    console.error('Error loading system prompt:', error)
-    return ''
+    console.error("Error loading system prompt:", error)
+    return ""
   }
 }
 
@@ -22,10 +22,12 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
         const payload = JSON.parse(init.body)
 
         // Check if this is a Google Generative AI API request
-        const isGoogleAI = url.toString().includes('generativelanguage.googleapis.com')
-        
+        const isGoogleAI = url
+          .toString()
+          .includes("generativelanguage.googleapis.com")
+
         // Get system prompt from payload or use default
-        let systemContent = 
+        let systemContent =
           payload.system_instruction ||
           payload.systemInstruction ||
           payload.system
@@ -34,7 +36,7 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
         if (isGoogleAI && !systemContent) {
           systemContent = await getSystemPrompt()
         }
-        
+
         // Handle system instruction if we have one or it's a Google AI request
         if (systemContent || isGoogleAI) {
           if (isGoogleAI) {
@@ -58,11 +60,6 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
 
               // Remove the messages array as it's not needed
               delete payload.messages
-            }
-            
-            // Always remove tools field for Google AI as it's not supported
-            if ('tools' in payload) {
-              delete payload.tools
             }
           } else {
             // For other providers, maintain the messages array approach
