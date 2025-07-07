@@ -24,13 +24,34 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
         const enableSearch = payload.enableSearch || false
 
         if (isGoogleAI) {
-          // Get system prompt from payload or use default
-          const systemContent = 
-            payload.system_instruction ||
-            payload.systemInstruction ||
-            payload.system ||
-            (await getSystemPrompt()) ||
-            ""
+          // Get system prompt from payload or use default, ensuring it's always a string
+          const getSystemContent = async () => {
+            const content = 
+              payload.system_instruction ||
+              payload.systemInstruction ||
+              payload.system ||
+              (await getSystemPrompt()) ||
+              "";
+            
+            // Handle case where content is an object
+            if (content && typeof content === 'object') {
+              try {
+                // If it has a text property, use that
+                if ('text' in content) {
+                  return String(content.text);
+                }
+                // Otherwise try to stringify the object
+                return JSON.stringify(content);
+              } catch (e) {
+                console.error('Error processing system content:', e);
+                return '';
+              }
+            }
+            // Ensure it's a string
+            return String(content);
+          };
+          
+          const systemContent = await getSystemContent();
 
           // Create the contents array from messages
           const contents: any[] = []
@@ -105,15 +126,20 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
           // Add system message as the first user message if available
           if (systemContent) {
             // If there are existing messages, merge system content with the first user message
-            if (contents.length > 0 && contents[0].role === 'user') {
-              contents[0].parts.unshift({ 
-                text: `[System]: ${systemContent}\n\n` 
-              });
-            } else {
-              contents.unshift({
-                role: 'user',
-                parts: [{ text: `[System]: ${systemContent}` }]
-              });
+            if (systemContent) {
+              const systemText = systemContent.trim();
+              if (contents.length > 0 && contents[0].role === 'user') {
+                // Prepend to the first user message
+                contents[0].parts.unshift({ 
+                  text: `[System]: ${systemText}\n\n` 
+                });
+              } else {
+                // Add as a new system message
+                contents.unshift({
+                  role: 'user',
+                  parts: [{ text: `[System]: ${systemText}` }]
+                });
+              }
             }
           }
           
