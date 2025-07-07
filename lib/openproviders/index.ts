@@ -36,54 +36,115 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
           const contents: any[] = []
           
           if (Array.isArray(payload.messages)) {
-            // Process messages in order
+            // Process messages in order, ensuring proper role alternation
+            let lastRole: string | null = null;
+            
             for (const msg of payload.messages) {
               // Skip empty messages
-              if (!msg.content) continue
+              if (!msg.content) continue;
               
               // Convert role to Gemini's expected format
-              const role = msg.role === 'assistant' ? 'model' : 'user'
+              let role = msg.role === 'assistant' ? 'model' : 'user';
               
-              // Handle different content formats for Gemini API
-              const parts: { text?: string }[] = []
-              
-              if (typeof msg.content === 'string') {
-                parts.push({ text: msg.content })
-              } else if (Array.isArray(msg.content)) {
-                // Handle array content (e.g., text parts)
-                for (const part of msg.content) {
-                  if (typeof part === 'string') {
-                    parts.push({ text: part })
-                  } else if (part && typeof part === 'object' && 'text' in part) {
-                    parts.push({ text: part.text || '' })
+              // Ensure roles alternate properly (Gemini requires strict alternation)
+              if (role === lastRole) {
+                // If same role as last message, append to the last message
+                if (contents.length > 0) {
+                  const lastMessage = contents[contents.length - 1];
+                  if (lastMessage.role === role) {
+                    // Handle different content formats for Gemini API
+                    if (typeof msg.content === 'string') {
+                      lastMessage.parts.push({ text: msg.content });
+                    } else if (Array.isArray(msg.content)) {
+                      for (const part of msg.content) {
+                        if (typeof part === 'string') {
+                          lastMessage.parts.push({ text: part });
+                        } else if (part?.text) {
+                          lastMessage.parts.push({ text: part.text });
+                        }
+                      }
+                    } else if (msg.content?.text) {
+                      lastMessage.parts.push({ text: msg.content.text });
+                    }
+                    continue;
                   }
                 }
-              } else if (msg.content && typeof msg.content === 'object' && 'text' in msg.content) {
-                parts.push({ text: msg.content.text || '' })
+              }
+              
+              // Create new message with parts
+              const parts: Array<{ text: string }> = [];
+              
+              // Handle different content formats for Gemini API
+              if (typeof msg.content === 'string') {
+                parts.push({ text: msg.content });
+              } else if (Array.isArray(msg.content)) {
+                for (const part of msg.content) {
+                  if (typeof part === 'string') {
+                    parts.push({ text: part });
+                  } else if (part?.text) {
+                    parts.push({ text: part.text });
+                  }
+                }
+              } else if (msg.content?.text) {
+                parts.push({ text: msg.content.text });
               }
               
               // Skip if no valid parts after processing
-              if (parts.length === 0) continue
+              if (parts.length === 0) continue;
               
               // Add the message to contents with proper parts structure
               contents.push({
                 role,
                 parts: parts
-              })
+              });
+              
+              lastRole = role;
             }
           }
 
           // Add system message as the first user message if available
           if (systemContent) {
-            contents.unshift({
-              role: 'user',
-              parts: [{ text: systemContent }]
-            })
+            // If there are existing messages, merge system content with the first user message
+            if (contents.length > 0 && contents[0].role === 'user') {
+              contents[0].parts.unshift({ 
+                text: `[System]: ${systemContent}\n\n` 
+              });
+            } else {
+              contents.unshift({
+                role: 'user',
+                parts: [{ text: `[System]: ${systemContent}` }]
+              });
+            }
           }
           
           // Create new payload with the correct structure
           const newPayload: any = {
-            contents: contents
+            contents: contents,
+            generationConfig: {
+              temperature: payload.temperature || 0.9,
+              topK: payload.top_k || 1,
+              topP: payload.top_p || 1,
+              maxOutputTokens: payload.max_tokens || 2048,
+              stopSequences: payload.stop ? (Array.isArray(payload.stop) ? payload.stop : [payload.stop]) : []
+            },
+            safetySettings: [
+              {
+                category: 'HARM_CATEGORY_HARASSMENT',
+                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+              },
+              {
+                category: 'HARM_CATEGORY_HATE_SPEECH',
+                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+              },
+              {
+                category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+              },
+              {
+                category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+              }
+            ]
           }
 
           // Add tools if search is enabled
