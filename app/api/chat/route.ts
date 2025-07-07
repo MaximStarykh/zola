@@ -4,7 +4,7 @@ import { getProviderForModel } from "@/lib/openproviders/provider-map"
 import type { SupportedModel } from "@/lib/openproviders/types"
 import type { ProviderWithoutOllama } from "@/lib/user-keys"
 import { Attachment } from "@ai-sdk/ui-utils"
-import { Message as MessageAISDK, streamText, ToolSet } from "ai"
+import { Message as MessageAISDK, streamText } from "ai"
 import {
   incrementMessageCount,
   logUserMessage,
@@ -80,6 +80,7 @@ export async function POST(req: Request) {
     }
 
     const effectiveSystemPrompt = systemPrompt || SYSTEM_PROMPT_DEFAULT
+    console.log("System prompt length:", effectiveSystemPrompt.length)
 
     let apiKey: string | undefined
     if (isAuthenticated && userId) {
@@ -112,6 +113,15 @@ export async function POST(req: Request) {
           })
         }
       },
+    })
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(result as any).on("metadata", (meta: any) => {
+      const ground = meta.providerMetadata?.google?.groundingMetadata
+      console.log("🔍 Queries used:", ground?.webSearchQueries)
+
+      const thinking = meta.providerMetadata?.google?.thinkingMetadata
+      console.log("🧠 Reasoning steps:", thinking)
     })
 
     return result.toDataStreamResponse({

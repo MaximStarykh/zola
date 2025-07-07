@@ -183,4 +183,4 @@ export const SYSTEM_PROMPT_DEFAULT = `
 ---
 *Disclaimer: Ця відповідь є результатом роботи AI-асистента oLegal і надається виключно для інформаційних цілей. Вона не є офіційною юридичною консультацією та не може замінити звернення до кваліфікованого юриста для аналізу вашої конкретної ситуації.*
 `
-export const MESSAGE_MAX_LENGTH = 10000
+export const MESSAGE_MAX_LENGTH = Infinity
