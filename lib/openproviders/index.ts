@@ -68,17 +68,17 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
             }
           }
 
+          // Add system message as the first user message if available
+          if (systemContent) {
+            contents.unshift({
+              role: 'user',
+              parts: [{ text: systemContent }]
+            })
+          }
+          
           // Create new payload with the correct structure
           const newPayload: any = {
             contents: contents
-          }
-          
-          // Add system instruction if available
-          if (systemContent) {
-            newPayload.systemInstruction = {
-              role: 'user',
-              parts: [{ text: systemContent }]
-            }
           }
 
           // Add tools if search is enabled
