@@ -50,7 +50,7 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
                 content = msg.content
               } else if (Array.isArray(msg.content)) {
                 // Handle array content (e.g., text parts)
-                content = msg.content.map(part => 
+                content = msg.content.map((part: string | { text?: string }) => 
                   typeof part === 'string' ? part : part.text || ''
                 ).join('\n')
               } else if (msg.content && typeof msg.content === 'object') {
