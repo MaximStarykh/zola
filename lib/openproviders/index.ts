@@ -147,10 +147,10 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
           const newPayload: any = {
             contents: contents,
             generationConfig: {
-              temperature: payload.temperature || 0.9,
+              temperature: payload.temperature || 1,
               topK: payload.top_k || 1,
               topP: payload.top_p || 1,
-              maxOutputTokens: payload.max_tokens || 2048,
+              maxOutputTokens: payload.max_tokens || 20480,
               stopSequences: payload.stop ? (Array.isArray(payload.stop) ? payload.stop : [payload.stop]) : []
             },
             safetySettings: [
