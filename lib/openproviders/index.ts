@@ -34,53 +34,51 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
 
           // Create the contents array from messages
           const contents: any[] = []
-          let currentContent: any = null
           
           if (Array.isArray(payload.messages)) {
             // Process messages in order
             for (const msg of payload.messages) {
-              if (msg.role === 'user') {
-                // Start a new content block for user messages
-                if (currentContent) {
-                  contents.push(currentContent)
-                }
-                currentContent = {
-                  role: 'user',
-                  parts: [{ text: msg.content }]
-                }
-              } else if (msg.role === 'assistant') {
-                // Add assistant response to the current content block
-                if (currentContent) {
-                  contents.push(currentContent)
-                }
-                currentContent = {
-                  role: 'model',
-                  parts: [{ text: msg.content }]
-                }
-              } else if (msg.role === 'system' && systemContent) {
-                // System message becomes the system instruction
-                if (currentContent) {
-                  contents.push(currentContent)
-                  currentContent = null
-                }
+              // Skip empty messages
+              if (!msg.content) continue
+              
+              // Convert role to Gemini's expected format
+              const role = msg.role === 'assistant' ? 'model' : 'user'
+              
+              // Handle both string and object content formats
+              let content = ''
+              if (typeof msg.content === 'string') {
+                content = msg.content
+              } else if (Array.isArray(msg.content)) {
+                // Handle array content (e.g., text parts)
+                content = msg.content.map(part => 
+                  typeof part === 'string' ? part : part.text || ''
+                ).join('\n')
+              } else if (msg.content && typeof msg.content === 'object') {
+                content = msg.content.text || ''
               }
-            }
-            
-            // Add the last content block if it exists
-            if (currentContent) {
-              contents.push(currentContent)
+              
+              // Skip if no content after processing
+              if (!content) continue
+              
+              // Add the message to contents
+              contents.push({
+                role,
+                parts: [{ text: content }]
+              })
             }
           }
 
-          // Create the system instruction
-          const systemInstruction = systemContent ? {
-            role: 'user',
-            parts: [{ text: systemContent }]
-          } : null
-
           // Create new payload with the correct structure
           const newPayload: any = {
-            contents: systemInstruction ? [systemInstruction, ...contents] : contents
+            contents: contents
+          }
+          
+          // Add system instruction if available
+          if (systemContent) {
+            newPayload.systemInstruction = {
+              role: 'user',
+              parts: [{ text: systemContent }]
+            }
           }
 
           // Add tools if search is enabled
