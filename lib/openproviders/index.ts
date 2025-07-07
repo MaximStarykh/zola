@@ -44,26 +44,31 @@ function withPatchedFetch(baseFetch: typeof fetch): typeof fetch {
               // Convert role to Gemini's expected format
               const role = msg.role === 'assistant' ? 'model' : 'user'
               
-              // Handle both string and object content formats
-              let content = ''
+              // Handle different content formats for Gemini API
+              const parts: { text?: string }[] = []
+              
               if (typeof msg.content === 'string') {
-                content = msg.content
+                parts.push({ text: msg.content })
               } else if (Array.isArray(msg.content)) {
                 // Handle array content (e.g., text parts)
-                content = msg.content.map((part: string | { text?: string }) => 
-                  typeof part === 'string' ? part : part.text || ''
-                ).join('\n')
-              } else if (msg.content && typeof msg.content === 'object') {
-                content = msg.content.text || ''
+                for (const part of msg.content) {
+                  if (typeof part === 'string') {
+                    parts.push({ text: part })
+                  } else if (part && typeof part === 'object' && 'text' in part) {
+                    parts.push({ text: part.text || '' })
+                  }
+                }
+              } else if (msg.content && typeof msg.content === 'object' && 'text' in msg.content) {
+                parts.push({ text: msg.content.text || '' })
               }
               
-              // Skip if no content after processing
-              if (!content) continue
+              // Skip if no valid parts after processing
+              if (parts.length === 0) continue
               
-              // Add the message to contents
+              // Add the message to contents with proper parts structure
               contents.push({
                 role,
-                parts: [{ text: content }]
+                parts: parts
               })
             }
           }
