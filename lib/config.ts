@@ -14,108 +14,116 @@ export const REMAINING_QUERY_ALERT_THRESHOLD = 2
 export const DAILY_FILE_UPLOAD_LIMIT = 5
 export const DAILY_LIMIT_PRO_MODELS = 500
 
-export const NON_AUTH_ALLOWED_MODELS = ["gpt-4.1-nano"]
-
-export const FREE_MODELS_IDS = [
-  "openrouter:deepseek/deepseek-r1:free",
-  "openrouter:meta-llama/llama-3.3-8b-instruct:free",
-  "pixtral-large-latest",
-  "mistral-large-latest",
-  "gpt-4.1-nano",
+export const NON_AUTH_ALLOWED_MODELS = [
+  "gemini-1.5-flash-latest",
+  "gemini-1.5-pro-latest",
+  "gemini-pro",
 ]
 
-export const MODEL_DEFAULT = "gpt-4.1-nano"
+export const FREE_MODELS_IDS = [
+  "gemini-1.5-flash-latest",
+  "gemini-1.5-pro-latest",
+  "gemini-pro",
+]
+
+export const MODEL_DEFAULT = "gemini-1.5-pro-latest"
 
 export const APP_NAME = "Zola"
 export const APP_DOMAIN = "https://zola.chat"
 
 export const SUGGESTIONS = [
   {
-    label: "Summary",
-    highlight: "Summarize",
-    prompt: `Summarize`,
+    label: "Правовий аналіз",
+    highlight: "Проаналізуй",
+    prompt: `Проаналізуй`,
     items: [
-      "Summarize the French Revolution",
-      "Summarize the plot of Inception",
-      "Summarize World War II in 5 sentences",
-      "Summarize the benefits of meditation",
+      "Проаналізуй ризики при купівлі квартири на вторинному ринку",
+      "Проаналізуй ситуацію з невиплатою заробітної плати",
+      "Проаналізуй можливість стягнення аліментів у 2024 році",
+      "Проаналізуй наслідки розірвання трудового договору",
     ],
-    icon: Notepad,
+    icon: "Gavel", 
   },
   {
-    label: "Code",
-    highlight: "Help me",
-    prompt: `Help me`,
+    label: "Підготовка документів",
+    highlight: "Склади",
+    prompt: `Склади`,
     items: [
-      "Help me write a function to reverse a string in JavaScript",
-      "Help me create a responsive navbar in HTML/CSS",
-      "Help me write a SQL query to find duplicate emails",
-      "Help me convert this Python function to JavaScript",
+      "Склади типовий договір оренди житла",
+      "Склади позовну заяву про стягнення боргу",
+      "Склади запит до державного органу",
+      "Склади заперечення на позов про розлучення",
     ],
-    icon: Code,
+    icon: "DocumentText", 
   },
   {
-    label: "Design",
-    highlight: "Design",
-    prompt: `Design`,
+    label: "Пояснення законів",
+    highlight: "Поясни",
+    prompt: `Поясни`,
     items: [
-      "Design a color palette for a tech blog",
-      "Design a UX checklist for mobile apps",
-      "Design 5 great font pairings for a landing page",
-      "Design better CTAs with useful tips",
+      "Поясни статтю 116 КЗпП України простою мовою",
+      "Поясни різницю між ФОП та ТОВ",
+      "Поясни, як оформити спадщину після смерті родича",
+      "Поясни, як діяти у разі ДТП без постраждалих",
     ],
-    icon: PaintBrush,
+    icon: "Lightbulb", 
   },
   {
-    label: "Research",
-    highlight: "Research",
-    prompt: `Research`,
+    label: "Розробка стратегії",
+    highlight: "Запропонуй стратегію",
+    prompt: `Запропонуй стратегію`,
     items: [
-      "Research the pros and cons of remote work",
-      "Research the differences between Apple Vision Pro and Meta Quest",
-      "Research best practices for password security",
-      "Research the latest trends in renewable energy",
+      "Запропонуй стратегію захисту у спорі з податковою",
+      "Запропонуй порядок дій при затриманні поліцією",
+      "Запропонуй стратегію захисту прав споживача",
+      "Запропонуй план дій при спадковому спорі",
     ],
-    icon: BookOpenText,
+    icon: "ChessBoard", 
   },
   {
-    label: "Get inspired",
-    highlight: "Inspire me",
-    prompt: `Inspire me`,
+    label: "Пошук законодавства",
+    highlight: "Знайди закон",
+    prompt: `Знайди закон`,
     items: [
-      "Inspire me with a beautiful quote about creativity",
-      "Inspire me with a writing prompt about solitude",
-      "Inspire me with a poetic way to start a newsletter",
-      "Inspire me by describing a peaceful morning in nature",
+      "Знайди актуальний текст Закону України про мобілізацію",
+      "Знайди статті ККУ щодо шахрайства",
+      "Знайди постанову Кабміну про комунальні тарифи",
+      "Знайди рішення Верховного Суду щодо розірвання шлюбу",
     ],
-    icon: Sparkle,
+    icon: "BookOpenText", 
   },
   {
-    label: "Think deeply",
-    highlight: "Reflect on",
-    prompt: `Reflect on`,
+    label: "Юридичні поради",
+    highlight: "Порадь",
+    prompt: `Порадь`,
     items: [
-      "Reflect on why we fear uncertainty",
-      "Reflect on what makes a conversation meaningful",
-      "Reflect on the concept of time in a simple way",
-      "Reflect on what it means to live intentionally",
+      "Порадь, як підготуватись до судового засідання",
+      "Порадь, які документи потрібні для оформлення субсидії",
+      "Порадь, як зафіксувати порушення трудових прав",
+      "Порадь, як перевірити нерухомість перед купівлею",
     ],
-    icon: Brain,
+    icon: "Handshake", 
   },
   {
-    label: "Learn gently",
-    highlight: "Explain",
-    prompt: `Explain`,
+    label: "Типові питання",
+    highlight: "Що робити якщо",
+    prompt: `Що робити якщо`,
     items: [
-      "Explain quantum physics like I'm 10",
-      "Explain stoicism in simple terms",
-      "Explain how a neural network works",
-      "Explain the difference between AI and AGI",
+      "Що робити, якщо вас затримала поліція?",
+      "Що робити, якщо сусіди заливають квартиру?",
+      "Що робити, якщо роботодавець не виплачує зарплату?",
+      "Що робити, якщо отримав повістку у військкомат?",
     ],
-    icon: Lightbulb,
+    icon: "QuestionMarkCircle", 
   },
-]
+];
 
-export const SYSTEM_PROMPT_DEFAULT = `You are Zola, a thoughtful and clear assistant. Your tone is calm, minimal, and human. You write with intention—never too much, never too little. You avoid clichés, speak simply, and offer helpful, grounded answers. When needed, you ask good questions. You don't try to impress—you aim to clarify. You may use metaphors if they bring clarity, but you stay sharp and sincere. You're here to help the user think clearly and move forward, not to overwhelm or overperform.`
+export const SYSTEM_PROMPT_DEFAULT = `
+Ти — oLegal, автономний AI-юрист. Відповідай українською, структуровано, обґрунтовано. 
+Завжди уточнюй факти, якщо це важливо для відповіді. Кожна порада базується на актуальному законодавстві України та рішеннях судів, з посиланнями на джерела. Використовуй Markdown, надавай практичні рекомендації й приклади, уникай оцінок і завжди додавай дисклеймер:
 
-export const MESSAGE_MAX_LENGTH = 10000
+---
+*Disclaimer: Ця відповідь є результатом роботи AI-асистента oLegal і надається виключно для інформаційних цілей. Вона не є офіційною юридичною консультацією та не може замінити звернення до кваліфікованого юриста для аналізу вашої конкретної ситуації.*
+`;
+
+export const MESSAGE_MAX_LENGTH = 100000

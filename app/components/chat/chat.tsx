@@ -70,6 +70,7 @@ export function Chat() {
 
   // State to pass between hooks
   const [hasDialogAuth, setHasDialogAuth] = useState(false)
+  const [showReasoning, setShowReasoning] = useState(false)
   const isAuthenticated = useMemo(() => !!user?.id, [user?.id])
   const systemPrompt = useMemo(
     () => user?.system_prompt || SYSTEM_PROMPT_DEFAULT,
@@ -120,6 +121,7 @@ export function Chat() {
     selectedModel,
     clearDraft,
     bumpChat,
+    showReasoning,
   })
 
   // Memoize the conversation props to prevent unnecessary rerenders
@@ -154,6 +156,8 @@ export function Chat() {
       status,
       setEnableSearch,
       enableSearch,
+      showReasoning,
+      setShowReasoning,
     }),
     [
       input,
@@ -174,6 +178,8 @@ export function Chat() {
       status,
       setEnableSearch,
       enableSearch,
+      showReasoning,
+      setShowReasoning,
     ]
   )
 

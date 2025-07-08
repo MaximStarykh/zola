@@ -14,6 +14,7 @@ import { useCallback, useMemo } from "react"
 import { PromptSystem } from "../suggestions/prompt-system"
 import { ButtonFileUpload } from "./button-file-upload"
 import { ButtonSearch } from "./button-search"
+import { ButtonReasoning } from "./button-reasoning"
 import { FileList } from "./file-list"
 
 type ChatInputProps = {
@@ -34,6 +35,8 @@ type ChatInputProps = {
   status?: "submitted" | "streaming" | "ready" | "error"
   setEnableSearch: (enabled: boolean) => void
   enableSearch: boolean
+  setShowReasoning: (enabled: boolean) => void
+  showReasoning: boolean
 }
 
 export function ChatInput({
@@ -53,6 +56,8 @@ export function ChatInput({
   status,
   setEnableSearch,
   enableSearch,
+  setShowReasoning,
+  showReasoning,
 }: ChatInputProps) {
   const selectModelConfig = getModelInfo(selectedModel)
   const hasSearchSupport = Boolean(selectModelConfig?.webSearch)
@@ -184,6 +189,11 @@ export function ChatInput({
                   isAuthenticated={isUserAuthenticated}
                 />
               ) : null}
+              <ButtonReasoning
+                isSelected={showReasoning}
+                onToggle={setShowReasoning}
+                isAuthenticated={isUserAuthenticated}
+              />
             </div>
             <PromptInputAction
               tooltip={status === "streaming" ? "Stop" : "Send"}

@@ -22,6 +22,7 @@ type ChatRequest = {
   isAuthenticated: boolean
   systemPrompt: string
   enableSearch: boolean
+  showReasoning: boolean
   message_group_id?: string
 }
 
@@ -35,6 +36,7 @@ export async function POST(req: Request) {
       isAuthenticated,
       systemPrompt,
       enableSearch,
+      showReasoning,
       message_group_id,
     } = (await req.json()) as ChatRequest
 
@@ -90,6 +92,7 @@ export async function POST(req: Request) {
     }
 
     const result = streamText({
+      toolChoice: showReasoning ? "auto" : "none",
       model: modelConfig.apiSdk(apiKey, { enableSearch }),
       system: effectiveSystemPrompt,
       messages: messages,
@@ -115,7 +118,7 @@ export async function POST(req: Request) {
     })
 
     return result.toDataStreamResponse({
-      sendReasoning: true,
+      sendReasoning: showReasoning,
       sendSources: true,
       getErrorMessage: (error: unknown) => {
         console.error("Error forwarded to client:", error)

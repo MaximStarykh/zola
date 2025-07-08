@@ -31,6 +31,8 @@ type UseChatCoreProps = {
   selectedModel: string
   clearDraft: () => void
   bumpChat: (chatId: string) => void
+  showReasoning: boolean
+  setShowReasoning: (show: boolean) => void
 }
 
 export function useChatCore({
@@ -49,6 +51,8 @@ export function useChatCore({
   selectedModel,
   clearDraft,
   bumpChat,
+  showReasoning,
+  setShowReasoning,
 }: UseChatCoreProps) {
   // State management
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -153,14 +157,14 @@ export function useChatCore({
     try {
       const allowed = await checkLimitsAndNotify(uid)
       if (!allowed) {
-        setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
+        setMessages((prev: Message[]) => prev.filter((m) => m.id !== optimisticId))
         cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
         return
       }
 
       const currentChatId = await ensureChatExists(uid, input)
       if (!currentChatId) {
-        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+        setMessages((prev: Message[]) => prev.filter((msg) => msg.id !== optimisticId))
         cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
         return
       }
@@ -170,7 +174,7 @@ export function useChatCore({
           title: `The message you submitted was too long, please submit something shorter. (Max ${MESSAGE_MAX_LENGTH} characters)`,
           status: "error",
         })
-        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+        setMessages((prev: Message[]) => prev.filter((msg) => msg.id !== optimisticId))
         cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
         return
       }
@@ -179,7 +183,7 @@ export function useChatCore({
       if (submittedFiles.length > 0) {
         attachments = await handleFileUploads(uid, currentChatId)
         if (attachments === null) {
-          setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
+          setMessages((prev: Message[]) => prev.filter((m) => m.id !== optimisticId))
           cleanupOptimisticAttachments(
             optimisticMessage.experimental_attachments
           )
@@ -195,12 +199,13 @@ export function useChatCore({
           isAuthenticated,
           systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
           enableSearch,
+          showReasoning,
         },
         experimental_attachments: attachments || undefined,
       }
 
       handleSubmit(undefined, options)
-      setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+      setMessages((prev: Message[]) => prev.filter((msg) => msg.id !== optimisticId))
       cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       cacheAndAddMessage(optimisticMessage)
       clearDraft()
@@ -209,8 +214,7 @@ export function useChatCore({
         bumpChat(currentChatId)
       }
     } catch {
-      setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+      setMessages((prev: Message[]) => prev.filter((msg) => msg.id !== optimisticId))
       toast({ title: "Failed to send message", status: "error" })
     } finally {
       setIsSubmitting(false)
@@ -251,26 +255,26 @@ export function useChatCore({
         createdAt: new Date(),
       }
 
-      setMessages((prev) => [...prev, optimisticMessage])
+      setMessages((prev: Message[]) => [...prev, optimisticMessage])
 
       try {
         const uid = await getOrCreateGuestUserId(user)
 
         if (!uid) {
-          setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+          setMessages((prev: Message[]) => prev.filter((msg) => msg.id !== optimisticId))
           return
         }
 
         const allowed = await checkLimitsAndNotify(uid)
         if (!allowed) {
-          setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
+          setMessages((prev: Message[]) => prev.filter((m) => m.id !== optimisticId))
           return
         }
 
         const currentChatId = await ensureChatExists(uid, suggestion)
 
         if (!currentChatId) {
-          setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+          setMessages((prev: Message[]) => prev.filter((msg) => msg.id !== optimisticId))
           return
         }
 
@@ -291,9 +295,9 @@ export function useChatCore({
           },
           options
         )
-        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+        setMessages((prev: Message[]) => prev.filter((msg) => msg.id !== optimisticId))
       } catch {
-        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+        setMessages((prev: Message[]) => prev.filter((msg) => msg.id !== optimisticId))
         toast({ title: "Failed to send suggestion", status: "error" })
       } finally {
         setIsSubmitting(false)
@@ -364,6 +368,8 @@ export function useChatCore({
     setHasDialogAuth,
     enableSearch,
     setEnableSearch,
+    showReasoning,
+    setShowReasoning,
 
     // Actions
     submit,
