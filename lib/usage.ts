@@ -5,7 +5,8 @@ import {
   FREE_MODELS_IDS,
   NON_AUTH_DAILY_MESSAGE_LIMIT,
 } from "@/lib/config"
-import { SupabaseClient } from "@supabase/supabase-js"
+import type { Database } from "@/app/types/database.types"
+import type { SupabaseClient } from "@supabase/supabase-js"
 
 const isFreeModel = (modelId: string) => FREE_MODELS_IDS.includes(modelId)
 const isProModel = (modelId: string) => !isFreeModel(modelId)
@@ -20,7 +21,7 @@ const isProModel = (modelId: string) => !isFreeModel(modelId)
  * @throws UsageLimitError if the daily limit is reached, or a generic Error if checking fails.
  * @returns User data including message counts and reset date
  */
-export async function checkUsage(supabase: SupabaseClient, userId: string) {
+export async function checkUsage(supabase: SupabaseClient<Database>, userId: string) {
   const { data: userData, error: userDataError } = await supabase
     .from("users")
     .select(
@@ -88,7 +89,7 @@ export async function checkUsage(supabase: SupabaseClient, userId: string) {
  * @throws Error if updating fails.
  */
 export async function incrementUsage(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   userId: string
 ): Promise<void> {
   const { data: userData, error: userDataError } = await supabase
@@ -125,7 +126,7 @@ export async function incrementUsage(
   }
 }
 
-export async function checkProUsage(supabase: SupabaseClient, userId: string) {
+export async function checkProUsage(supabase: SupabaseClient<Database>, userId: string) {
   const { data: userData, error: userDataError } = await supabase
     .from("users")
     .select("daily_pro_message_count, daily_pro_reset")
@@ -177,7 +178,7 @@ export async function checkProUsage(supabase: SupabaseClient, userId: string) {
 }
 
 export async function incrementProUsage(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   userId: string
 ) {
   const { data, error } = await supabase
@@ -206,7 +207,7 @@ export async function incrementProUsage(
 }
 
 export async function checkUsageByModel(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   userId: string,
   modelId: string,
   isAuthenticated: boolean
@@ -222,7 +223,7 @@ export async function checkUsageByModel(
 }
 
 export async function incrementUsageByModel(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   userId: string,
   modelId: string,
   isAuthenticated: boolean

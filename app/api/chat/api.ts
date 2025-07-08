@@ -10,7 +10,7 @@ import { getProviderForModel } from "@/lib/openproviders/provider-map"
 import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
 import { checkUsageByModel, incrementUsage } from "@/lib/usage"
-import { getUserKey, type ProviderWithoutOllama } from "@/lib/user-keys"
+import { getEffectiveApiKey, type ProviderWithoutOllama } from "@/lib/user-keys"
 
 export async function validateAndTrackUsage({
   userId,
@@ -33,7 +33,7 @@ export async function validateAndTrackUsage({
     const provider = getProviderForModel(model)
 
     if (provider !== "ollama") {
-      const userApiKey = await getUserKey(
+      const userApiKey = await getEffectiveApiKey(
         userId,
         provider as ProviderWithoutOllama
       )
