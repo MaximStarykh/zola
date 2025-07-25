@@ -120,10 +120,14 @@ export async function signInWithGoogle(supabase: SupabaseClient) {
 
     const baseUrl = getBaseUrl()
 
+    const redirectTo = `${baseUrl}/auth/callback`
+
+    console.log("Initiating OAuth with redirectTo:", redirectTo);
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${baseUrl}/auth/callback`,
+        redirectTo,
         queryParams: {
           access_type: "offline",
           prompt: "consent",
