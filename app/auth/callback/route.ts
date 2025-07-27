@@ -5,8 +5,6 @@ import { createGuestServerClient } from "@/lib/supabase/server-guest"
 import { NextResponse } from "next/server"
 
 export async function GET(request: Request) {
-  console.log("Received callback request with URL:", request.url);
-
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get("code")
   const next = searchParams.get("next") ?? "/"

@@ -55,7 +55,7 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
                 }
               />
               <Link
-                href="/auth"
+                href="/auth/login"
                 className="font-base text-muted-foreground hover:text-foreground text-base transition-colors"
               >
                 Login
