@@ -14,7 +14,7 @@ import { ThemeProvider } from "next-themes"
 import Script from "next/script"
 import { AuthProvider } from "./components/providers/AuthProvider"
 import { LayoutClient } from "./layout-client"
-import { PrivyWrapper } from "@/components/providers/PrivyWrapper" // 👈 Імпорт з client component
+import { PrivyProvider } from "@privy-io/react-auth"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,7 +51,25 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <PrivyWrapper>
+        <PrivyProvider
+          appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
+          config={{
+            appearance: {
+              accentColor: '#6A6FF5',
+              theme: '#FFFFFF',
+              showWalletLoginFirst: false,
+              logo: 'https://auth.privy.io/logos/privy-logo.png',
+            },
+            loginMethods: ['email', 'wallet', 'google', 'apple', 'github', 'discord'],
+            embeddedWallets: {
+              createOnLogin: 'users-without-wallets',
+              requireUserPasswordOnCreate: false,
+            },
+            mfa: {
+              noPromptOnMfaRequired: false,
+            },
+          }}
+        >
           <TanstackQueryProvider>
             <LayoutClient />
             <UserProvider>
@@ -83,7 +101,7 @@ export default function RootLayout({
               </AuthProvider>
             </UserProvider>
           </TanstackQueryProvider>
-        </PrivyWrapper>
+        </PrivyProvider>
       </body>
     </html>
   )
