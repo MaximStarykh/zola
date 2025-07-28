@@ -21,9 +21,9 @@ import {
 
 const TRANSITION = {
   type: "spring",
-  bounce: 0.1,
-  duration: 0.4,
-}
+  bounce: 0.15,
+  duration: 0.5,
+} as const
 
 type MorphingPopoverContextValue = {
   isOpen: boolean

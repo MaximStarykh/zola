@@ -14,9 +14,9 @@ import { useState } from "react"
 
 const TRANSITION_POPOVER = {
   type: "spring",
-  bounce: 0.1,
-  duration: 0.3,
-}
+  bounce: 0.15,
+  duration: 0.5,
+} as const
 
 type FeedbackWidgetProps = {
   authUserId?: string

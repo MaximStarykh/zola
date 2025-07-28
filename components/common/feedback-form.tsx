@@ -11,7 +11,7 @@ import { useState } from "react"
 const TRANSITION_CONTENT = {
   ease: "easeOut",
   duration: 0.2,
-}
+} as const
 
 type FeedbackFormProps = {
   authUserId?: string
