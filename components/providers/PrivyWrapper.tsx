@@ -1,6 +1,59 @@
-'use client'
+'use client';
 
-import { PrivyProvider } from '@privy-io/react-auth'
+import { PrivyProvider, usePrivy } from '@privy-io/react-auth';
+import { useEffect, useState } from 'react';
+
+import { createClient } from '@/lib/supabase/client';
+
+const AuthHandler = ({ children }: { children: React.ReactNode }) => {
+  const { authenticated, getAccessToken } = usePrivy();
+  const [isSyncing, setIsSyncing] = useState(false);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const syncUser = async () => {
+      if (authenticated && !isSyncing) {
+        setIsSyncing(true);
+        try {
+          const accessToken = await getAccessToken();
+          if (!accessToken) {
+            setIsSyncing(false);
+            return;
+          }
+
+          const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+            },
+          });
+
+          if (response.ok) {
+            if (!supabase) {
+              console.error('Supabase client is not available');
+              return;
+            }
+            const { accessToken, refreshToken } = await response.json();
+            await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+          } else {
+            console.error('Failed to sync user with backend');
+          }
+        } catch (error) {
+          console.error('Error syncing user:', error);
+        } finally {
+          setIsSyncing(false);
+        }
+      }
+    };
+
+    syncUser();
+  }, [authenticated, getAccessToken, isSyncing, supabase]);
+
+  return <>{children}</>;
+};
 
 export function PrivyWrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -12,47 +65,18 @@ export function PrivyWrapper({ children }: { children: React.ReactNode }) {
           theme: '#FFFFFF',
           showWalletLoginFirst: false,
           logo: 'https://auth.privy.io/logos/privy-logo.png',
-          walletChainType: 'ethereum-and-solana',
-          walletList: [
-            'detected_wallets',
-            'metamask',
-            'phantom',
-            'coinbase_wallet',
-            'base_account',
-            'rainbow',
-            'solflare',
-            'backpack',
-            'okx_wallet',
-            'wallet_connect',
-          ],
         },
         loginMethods: ['email', 'wallet', 'google', 'apple', 'github', 'discord'],
-        fundingMethodConfig: {
-          moonpay: {
-            useSandbox: true,
-          },
-        },
         embeddedWallets: {
+          createOnLogin: 'users-without-wallets',
           requireUserPasswordOnCreate: false,
-          showWalletUIs: true,
-          ethereum: {
-            createOnLogin: 'users-without-wallets',
-          },
-          solana: {
-            createOnLogin: 'users-without-wallets',
-          },
         },
         mfa: {
           noPromptOnMfaRequired: false,
         },
-        externalWallets: {
-          solana: {
-            // 🔥 Виправлення: видаляємо `connectors`, бо воно викликає onMount
-          },
-        },
       }}
     >
-      {children}
+      <AuthHandler>{children}</AuthHandler>
     </PrivyProvider>
-  )
+  );
 }
