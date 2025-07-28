@@ -1,7 +1,7 @@
 // todo: fix this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { toast } from "@/components/ui/toast"
-import { useChat } from "@ai-sdk/react"
+import { useChat } from "ai/react"
 import { useMemo } from "react"
 
 type ModelConfig = {
