@@ -13,7 +13,7 @@ import { UserProvider } from "@/lib/user-store/provider"
 import { getUserProfile } from "@/lib/user/api"
 import { ThemeProvider } from "next-themes"
 import Script from "next/script"
-import { AuthProvider } from "@/components/providers/AuthProvider"
+import { AuthProvider } from "@/app/components/providers/AuthProvider"
 import { LayoutClient } from "./layout-client"
 import { PrivyWrapper } from "@/components/providers/PrivyWrapper" // 👈 Імпорт з client component
 
