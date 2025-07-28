@@ -56,12 +56,15 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
                   </Button>
                 }
               />
-              <button
-                onClick={() => login()}
-                className="font-base text-muted-foreground hover:text-foreground text-base transition-colors"
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  console.log('Login button clicked');
+                  login();
+                }}
               >
                 Login
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="pointer-events-auto flex flex-1 items-center justify-end gap-2">
