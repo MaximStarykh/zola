@@ -20,68 +20,35 @@ type UserContextType = {
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
-export function UserProvider({
-  children,
-  initialUser,
-}: {
-  children: React.ReactNode
-  initialUser: UserProfile | null
-}) {
-  const [user, setUser] = useState<UserProfile | null>(initialUser)
-  const [isLoading, setIsLoading] = useState(false)
-
-  const refreshUser = async () => {
-    if (!user?.id) return
-
-    setIsLoading(true)
-    try {
-      const updatedUser = await fetchUserProfile(user.id)
-      if (updatedUser) setUser(updatedUser)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+export function UserProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<UserProfile | null>(null)
+  const [isLoading, setIsLoading] = useState(true) // Start with loading true
 
   const updateUser = async (updates: Partial<UserProfile>) => {
     if (!user?.id) return
 
-    setIsLoading(true)
-    try {
-      const success = await updateUserProfile(user.id, updates)
-      if (success) {
-        setUser((prev) => (prev ? { ...prev, ...updates } : null))
-      }
-    } finally {
-      setIsLoading(false)
-    }
+    // Optimistically update the user state
+    setUser((prev) => (prev ? { ...prev, ...updates } : null))
+
+    // Then, send the update to the server
+    await updateUserProfile(user.id, updates)
   }
 
   const signOut = async () => {
-    setIsLoading(true)
-    try {
-      const success = await signOutUser()
-      if (success) setUser(null)
-    } finally {
-      setIsLoading(false)
-    }
+    setUser(null)
   }
-
-  // Set up realtime subscription for user data changes
-  useEffect(() => {
-    if (!user?.id) return
-
-    const unsubscribe = subscribeToUserUpdates(user.id, (newData) => {
-      setUser((prev) => (prev ? { ...prev, ...newData } : null))
-    })
-
-    return () => {
-      unsubscribe()
-    }
-  }, [user?.id])
 
   return (
     <UserContext.Provider
-      value={{ user, isLoading, updateUser, refreshUser, signOut }}
+      value={{
+        user,
+        isLoading,
+        updateUser,
+        signOut,
+        // Expose setUser to be used by the Privy auth wrapper
+        setUser,
+        setIsLoading,
+      }}
     >
       {children}
     </UserContext.Provider>
