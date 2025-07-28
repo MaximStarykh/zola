@@ -10,16 +10,16 @@ import { Button } from "@/components/ui/button"
 import { APP_NAME } from "@/lib/config"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { useUser } from "@/lib/user-store/provider"
-import { usePrivy } from '@privy-io/react-auth'
+
 import { Info } from "@phosphor-icons/react"
 import Link from "next/link"
 import { DialogPublish } from "./dialog-publish"
 import { HeaderSidebarTrigger } from "./header-sidebar-trigger"
+import { LoginButton } from "./LoginButton"
 
 export function Header({ hasSidebar }: { hasSidebar: boolean }) {
   const isMobile = useBreakpoint(768)
   const { user } = useUser()
-  const { login } = usePrivy()
   const { preferences } = useUserPreferences()
   const isMultiModelEnabled = preferences.multiModelEnabled
 
@@ -42,38 +42,32 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
             </div>
           </div>
           <div />
-          {!isLoggedIn ? (
-            <div className="pointer-events-auto flex flex-1 items-center justify-end gap-4">
-              <AppInfoTrigger
-                trigger={
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="bg-background hover:bg-muted text-muted-foreground h-8 w-8 rounded-full"
-                    aria-label={`About ${APP_NAME}`}
-                  >
-                    <Info className="size-4" />
-                  </Button>
-                }
-              />
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  console.log('Login button clicked');
-                  login();
-                }}
-              >
-                Login
-              </Button>
-            </div>
-          ) : (
-            <div className="pointer-events-auto flex flex-1 items-center justify-end gap-2">
-              {!isMultiModelEnabled && <DialogPublish />}
-              <ButtonNewChat />
-              {!hasSidebar && <HistoryTrigger hasSidebar={hasSidebar} />}
-              <UserMenu />
-            </div>
-          )}
+          <div className="pointer-events-auto flex flex-1 items-center justify-end gap-2">
+            {isLoggedIn ? (
+              <>
+                {!isMultiModelEnabled && <DialogPublish />}
+                <ButtonNewChat />
+                {!hasSidebar && <HistoryTrigger hasSidebar={hasSidebar} />}
+                <UserMenu />
+              </>
+            ) : (
+              <>
+                <AppInfoTrigger
+                  trigger={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="bg-background hover:bg-muted text-muted-foreground h-8 w-8 rounded-full"
+                      aria-label={`About ${APP_NAME}`}
+                    >
+                      <Info className="size-4" />
+                    </Button>
+                  }
+                />
+                <LoginButton />
+              </>
+            )}
+          </div>
         </div>
       </div>
     </header>
