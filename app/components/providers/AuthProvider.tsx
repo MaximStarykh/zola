@@ -1,12 +1,12 @@
 'use client'
 
-import { useUser as usePrivyUser, useLogin } from '@privy-io/react-auth'
+import { usePrivy, useLogin } from '@privy-io/react-auth'
 import { useEffect } from 'react'
 import { useUser } from '@/lib/user-store/provider'
 import { getAccessToken } from '@privy-io/react-auth'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { user: privyUser, authenticated } = usePrivyUser()
+  const { user: privyUser, authenticated, ready } = usePrivy()
   const { setUser, setIsLoading, user: appUser } = useUser()
 
   useEffect(() => {

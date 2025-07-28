@@ -8,7 +8,10 @@ import {
   updateUserProfile,
 } from "@/lib/user-store/api"
 import type { UserProfile } from "@/lib/user/types"
+import { createClient } from "@/lib/supabase/client"
 import { createContext, useContext, useEffect, useState } from "react"
+
+const supabase = createClient()
 
 type UserContextType = {
   user: UserProfile | null
@@ -16,6 +19,9 @@ type UserContextType = {
   updateUser: (updates: Partial<UserProfile>) => Promise<void>
   refreshUser: () => Promise<void>
   signOut: () => Promise<void>
+  // Internal methods used by AuthProvider
+  setUser: (user: UserProfile | null) => void
+  setIsLoading: (isLoading: boolean) => void
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -35,8 +41,70 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+    await signOutUser()
     setUser(null)
   }
+
+  const refreshUser = async (): Promise<void> => {
+    if (!user?.id) return;
+    
+    setIsLoading(true);
+    try {
+      const updatedProfile = await fetchUserProfile(user.id);
+      if (updatedProfile) {
+        setUser(updatedProfile);
+      }
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // Set up subscription to user updates
+  useEffect(() => {
+    if (!user?.id) return
+    
+    const unsubscribe = subscribeToUserUpdates(user.id, (payload) => {
+      setUser((current) => (current ? { ...current, ...payload.new } : null))
+    })
+    
+    return () => unsubscribe()
+  }, [user?.id])
+
+  // Initial user load
+  useEffect(() => {
+    const loadUser = async () => {
+      if (!supabase) {
+        console.error('Supabase client is not available')
+        setIsLoading(false)
+        return
+      }
+
+      setIsLoading(true)
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser()
+        
+        if (error) {
+          console.error('Error getting user:', error)
+          return
+        }
+
+        if (user) {
+          const userProfile = await fetchUserProfile(user.id)
+          if (userProfile) {
+            setUser(userProfile)
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadUser()
+  }, [])
 
   return (
     <UserContext.Provider
@@ -45,6 +113,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         updateUser,
         signOut,
+        refreshUser,
         // Expose setUser to be used by the Privy auth wrapper
         setUser,
         setIsLoading,
